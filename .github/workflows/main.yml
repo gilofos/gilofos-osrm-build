@@ -9,14 +9,23 @@ jobs:
         run: |
           wget http://geofabrik.de -O greece.osm.pbf
 
-      - name: Process Map with Stable OSRM v5.24.0
+      - name: Download Car Profile Directly
         run: |
-          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend:v5.24.0 osrm-extract -p /usr/local/share/osrm/profiles/car.lua /data/greece.osm.pbf
-          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend:v5.24.0 osrm-contract /data/greece.osrm
+          wget https://githubusercontent.com -O car.lua
+          wget https://githubusercontent.com -O access.lua
+          wget https://githubusercontent.com -O guidance.lua
+          wget https://githubusercontent.com -O parse_duration.lua
+          wget https://githubusercontent.com -O tags.lua
+          mkdir -p lib
+          mv access.lua guidance.lua parse_duration.lua tags.lua lib/
+
+      - name: Process Map with OSRM Backend
+        run: |
+          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend osrm-extract -p /data/car.lua /data/greece.osm.pbf
+          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend osrm-contract /data/greece.osrm
 
       - name: Pack and Upload Ready OSRM File
         uses: actions/upload-artifact@v4
         with:
           name: greece-offline-osrm
           path: ${{ github.workspace }}/greece.osrm
-
