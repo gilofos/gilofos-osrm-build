@@ -1,0 +1,21 @@
+name: Build OSRM Greece Map
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Greece Map from Geofabrik
+        run: |
+          wget http://geofabrik.de -O greece.osm.pbf
+
+      - name: Process Map with OSRM Backend
+        run: |
+          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend osrm-extract -p /profiles/car.lua /data/greece.osm.pbf
+          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend osrm-contract /data/greece.osrm
+
+      - name: Pack and Upload Ready OSRM File
+        uses: actions/upload-artifact@v4
+        with:
+          name: greece-offline-osrm
+          path: ${{ github.workspace }}/greece.osrm
