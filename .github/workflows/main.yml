@@ -9,10 +9,10 @@ jobs:
         run: |
           wget http://geofabrik.de -O greece.osm.pbf
 
-      - name: Process Map with OSRM Backend
+      - name: Process Map with Stable OSRM v5.24.0
         run: |
-          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend osrm-extract /data/greece.osm.pbf
-          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend osrm-contract /data/greece.osrm
+          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend:v5.24.0 osrm-extract -p /usr/local/share/osrm/profiles/car.lua /data/greece.osm.pbf
+          docker run -v ${{ github.workspace }}:/data osrm/osrm-backend:v5.24.0 osrm-contract /data/greece.osrm
 
       - name: Pack and Upload Ready OSRM File
         uses: actions/upload-artifact@v4
